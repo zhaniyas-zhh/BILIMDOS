@@ -280,9 +280,25 @@ function profileView() {
 }
 
 /* ---------- router ---------- */
-let booted = false;
+let booted = false, guesting = false;
+async function guestLogin() {
+  guesting = true;
+  try {
+    const id = Math.random().toString(36).slice(2, 10);
+    const { data, error } = await sb.auth.signInAnonymously({
+      options: { data: { full_name: 'Қонақ', username: 'guest_' + id, school: '', grade: '', city: '' } } });
+    if (error || !data.session) return;
+    S.session = data.session;
+    await loadProfile();
+    if (S.profile && !S.profile.onboarding_done) {
+      await sb.from('profiles').update({ onboarding_done: true }).eq('id', S.session.user.id);
+      await loadProfile();
+    }
+  } finally { guesting = false; }
+}
 async function render() {
   if (!booted) return;
+  if (guesting) { $('#app').innerHTML = `<p class="center muted" style="padding:40px">${t('loading')}</p>`; return; }
   document.documentElement.lang = S.lang;
   const route = (location.hash.replace('#/', '') || '').split('?')[0];
   const app = $('#app');
@@ -421,6 +437,9 @@ window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); S.in
     }, 0);
   });
   const { data } = await sb.auth.getSession();
-  S.session = data.session; await loadProfile(); booted = true; render();
+  S.session = data.session;
+  const r0 = (location.hash.replace('#/', '') || '').split('?')[0];
+  if (!S.session && !['login', 'register', 'forgot', 'reset'].includes(r0)) await guestLogin();
+  await loadProfile(); booted = true; render();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();

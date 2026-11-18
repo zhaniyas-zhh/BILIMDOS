@@ -2,8 +2,8 @@
    BILIMDOS — Stage 1 (plain JS, no build step)
    1) Put your Supabase values below (anon key is public by design; RLS protects data)
    ===================================================================== */
-const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+const SUPABASE_URL = 'https://qisaqqyjkrbkabempgue.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_JQ9Ju2KI7sgamWfPgT3-nw_kajuBwDk';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
